@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import "./styles.css";
 
-
 const drawGauge = (ctx, temperature) => {
   const centerX = 150;
   const centerY = 150;
