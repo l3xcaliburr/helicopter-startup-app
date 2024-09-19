@@ -169,7 +169,7 @@ const drawGauge = (ctx, temperature) => {
   ctx.arc(centerX, centerY, radius - 15, (172 * Math.PI) / 180, (265 * Math.PI) / 180);
   const greenGradient = ctx.createLinearGradient(0, 0, 300, 0);
   greenGradient.addColorStop(0, "lime");
-  greenGradient.addColorStop(1, "green");
+  greenGradient.addColorStop(1, "lime");
   ctx.strokeStyle = greenGradient;
   ctx.lineWidth = 12;
   ctx.stroke();
@@ -300,7 +300,7 @@ const drawNgGauge = (ctx, ngValue) => {
   ctx.fillText("%N1", centerX, centerY - 22);
 
   // Draw altimeter-style needle
-  const needleAngle = getNeedleAngle(ngValue); // Assuming getNeedleAngle is correctly calculating the angle
+  const needleAngle = getN1Angle(ngValue); // Use the ngValue and map it to the correct angle
 
   // Needle parameters
   const needleLength = radius * .9; // Length of the needle (80% of the radius)
@@ -345,44 +345,98 @@ const drawNgGauge = (ctx, ngValue) => {
   ctx.stroke();
   ctx.closePath();
 
-  // Draw arbitrary tick values (you will update these)
+  // Define tick angles and labels, rotated counterclockwise by 45 degrees
   const tickAngles = [
-    { angle: 150, label: "0" }, // Arbitrary positions
-    { angle: 170, label: "1" },
-    { angle: 190, label: "2" },
-    { angle: 210, label: "3" },
-    { angle: 230, label: "4" },
-    { angle: 250, label: "5" },
-    { angle: 270, label: "6" },
-    { angle: 290, label: "7" },
-    { angle: 310, label: "8" },
-    { angle: 330, label: "9" },
-    { angle: 350, label: "10" }
+    { angle: 186-35, label: "0" },   // 0% N1 
+    { angle: 193-35, label: "" },    // 5% N1
+    { angle: 200-35, label: "10" },   // 10% N1
+    { angle: 207-35, label: "" },    // 15% N1
+    { angle: 214-35, label: "20" },   // 20% N1
+    { angle: 221-35, label: "" },    // 25% N1
+    { angle: 228-35, label: "30" },   // 30% N1
+    { angle: 235-35, label: "" },    // 35% N1
+    { angle: 242-35, label: "40" },   // 40% N1
+    { angle: 249-35, label: "" },    // 45% N1
+    { angle: 256-35, label: "50" },   // 50% N1
+    { angle: 270-35, label: "" },   // 55% N1
+    { angle: 284-35, label: "60" },   // 60% N1
+    { angle: 298-35, label: "" },    // 65% N1
+    { angle: 312-35, label: "70" },    // 70% N1
+    { angle: 326-35, label: "" },    // 75% N1
+    { angle: 340-35, label: "80" },   // 80% N1
+    { angle: 354-35, label: "" },    // 85% N1
+    { angle: 8-35, label: "90" },    // 90% N1
+    { angle: 22-35, label: "" },    // 95% N1
+    { angle: 36-35, label: "100" },   // 100% N1
+    { angle: 50-35, label: "" },   // 105% N1
+    { angle: 64-35, label: "110" } // 110% N1
   ];
 
-  tickAngles.forEach(({ angle, label }) => {
+  // Draw ticks
+  tickAngles.forEach(({ angle, label }, index) => {
     const rad = (angle * Math.PI) / 180;
-    const tickXStart = centerX + radius * 0.8 * Math.cos(rad);
-    const tickYStart = centerY + radius * 0.8 * Math.sin(rad);
-    const tickXEnd = centerX + radius * Math.cos(rad);
-    const tickYEnd = centerY + radius * Math.sin(rad);
+
+    // Check if it's a main or intermediate tick
+    const isMainTick = label !== ""; // Main ticks have labels
+
+    // Set tick length based on main or intermediate tick
+    const tickStartRadius = 0.8 * radius; // Same inner radius
+    const tickEndRadius = isMainTick ? radius : .95 * radius; // Shorter for intermediate ticks
+
+    // Calculate tick start and end positions
+    const xStart = centerX + tickStartRadius * Math.cos(rad);
+    const yStart = centerY + tickStartRadius * Math.sin(rad);
+    const xEnd = centerX + tickEndRadius * Math.cos(rad);
+    const yEnd = centerY + tickEndRadius * Math.sin(rad);
 
     // Draw tick
     ctx.beginPath();
-    ctx.moveTo(tickXStart, tickYStart);
-    ctx.lineTo(tickXEnd, tickYEnd);
+    ctx.moveTo(xStart, yStart);
+    ctx.lineTo(xEnd, yEnd);
     ctx.strokeStyle = "white";
     ctx.lineWidth = 2;
     ctx.stroke();
     ctx.closePath();
 
-    // Draw labels
-    const labelX = centerX + (radius * 0.65) * Math.cos(rad);
-    const labelY = centerY + (radius * 0.65) * Math.sin(rad);
-    ctx.fillStyle = "white";
-    ctx.font = "12px Arial";
-    ctx.fillText(label, labelX, labelY + 5);
+    // Draw labels for main ticks only
+    if (label) {
+      // Position label inside the tick, closer to the center (inner circumference)
+      const labelRadius = radius * .70;  // Inner radius for labels (adjust as needed)
+      const labelX = centerX + labelRadius * Math.cos(rad);  // Calculate label X position
+      const labelY = centerY + labelRadius * Math.sin(rad);  // Calculate label Y position
+
+      ctx.fillStyle = "white";
+      ctx.font = "bold 12px Arial";
+      ctx.textAlign = "center";  // Center the label horizontally
+      ctx.fillText(label, labelX, labelY + 1.5);  // Adjust Y slightly for better centering
+    }
   });
+
+    // Enhanced arcs with gradient strokes
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, radius - 15, (257.4 * Math.PI) / 180, (15 * Math.PI) / 180);
+    const greenGradient = ctx.createLinearGradient(0, 0, 300, 0);
+    greenGradient.addColorStop(0, "lime");
+    greenGradient.addColorStop(1, "lime");
+    ctx.strokeStyle = greenGradient;
+    ctx.lineWidth = 12;
+    ctx.stroke();
+    ctx.closePath();
+
+    // Red tick at 105% N1
+    const redTickAngle = (15) * Math.PI / 180;
+    ctx.beginPath();
+    const xStartRed = centerX + radius * 0.75 * Math.cos(redTickAngle);
+    const yStartRed = centerY + radius * 0.75 * Math.sin(redTickAngle);
+    const xEndRed = centerX + radius * Math.cos(redTickAngle);
+    const yEndRed = centerY + radius * Math.sin(redTickAngle);
+    ctx.moveTo(xStartRed, yStartRed);
+    ctx.lineTo(xEndRed, yEndRed);
+    ctx.strokeStyle = "red";
+    ctx.lineWidth = 3; // Slightly longer red tick
+    ctx.stroke();
+    ctx.closePath();
+
 
     // Draw digital readout box (centered)
     const boxWidth = 80;  // Adjusted to make it slightly larger and more modern
@@ -501,6 +555,40 @@ const getNeedleAngle = (temperature) => {
   if (temperature > 1000) return tempAngleMap[tempAngleMap.length - 1].angle; // 1000°C
 };
 
+const getN1Angle = (ngValue) => {
+  // Define N1 percentage to angle mapping (similar to your tick angles)
+  const ngAngleMap = [
+    { ng: 0, angle: (186 - 35) * Math.PI / 180 },   // 0% N1
+    { ng: 10, angle: (200 - 35) * Math.PI / 180 },  // 10% N1
+    { ng: 20, angle: (214 - 35) * Math.PI / 180 },  // 20% N1
+    { ng: 30, angle: (228 - 35) * Math.PI / 180 },  // 30% N1
+    { ng: 40, angle: (242 - 35) * Math.PI / 180 },  // 40% N1
+    { ng: 50, angle: (256 - 35) * Math.PI / 180 },  // 50% N1
+    { ng: 60, angle: (284 - 35) * Math.PI / 180 },  // 60% N1
+    { ng: 70, angle: (312 - 35) * Math.PI / 180 },  // 70% N1
+    { ng: 80, angle: (340 - 35) * Math.PI / 180 },  // 80% N1
+    { ng: 90, angle: (368 - 35) * Math.PI / 180 },    // 90% N1
+    { ng: 100, angle: (396 - 35) * Math.PI / 180 },  // 100% N1
+    { ng: 110, angle: (424 - 35) * Math.PI / 180 },  // 110% N1
+  ];
+
+  // Find the correct interval and interpolate the angle
+  for (let i = 0; i < ngAngleMap.length - 1; i++) {
+    const lower = ngAngleMap[i];
+    const upper = ngAngleMap[i + 1];
+
+    if (ngValue >= lower.ng && ngValue <= upper.ng) {
+      // Interpolate between the lower and upper angle based on the NG percentage
+      const ratio = (ngValue - lower.ng) / (upper.ng - lower.ng);
+      return lower.angle + ratio * (upper.angle - lower.angle);
+    }
+  }
+
+  // If NG value is out of bounds, clamp to the min or max angle
+  if (ngValue < 0) return ngAngleMap[0].angle;    // 0% N1
+  if (ngValue > 110) return ngAngleMap[ngAngleMap.length - 1].angle; // 110% N1
+};
+
 const TemperatureGauge = () => {
   const tempCanvasRef = useRef(null);
   const ngCanvasRef = useRef(null); // New ref for NG gauge
@@ -577,10 +665,10 @@ const TemperatureGauge = () => {
           <input
             type="range"
             min="0"
-            max="1000"
+            max="110"
             value={ngValue}
             onChange={handleNgChange}
-            step="1"
+            step="0.1"
           />
         </div>
       </div>
