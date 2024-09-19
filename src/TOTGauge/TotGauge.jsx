@@ -303,7 +303,7 @@ const TOTGauge = (ctx, temperature) => {
   ctx.textBaseline = "middle";  // Vertically align text in the middle
 
   // Draw the temperature value (centered inside the box)
-  ctx.fillText(temperature, centerX, centerY + radius / 3 + boxHeight / 1.8); // Perfectly centered in the box
+  ctx.fillText(Math.round(temperature), centerX, centerY + radius / 3 + boxHeight / 1.8); // Perfectly centered in the box
 };
 
 export default TOTGauge;

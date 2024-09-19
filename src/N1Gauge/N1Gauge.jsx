@@ -191,7 +191,8 @@ const N1Gauge = (ctx, ngValue) => {
     ctx.textBaseline = "middle";  // Vertically align text in the middle
   
     // Draw the ngValue value (centered inside the box)
-    ctx.fillText(ngValue, centerX, centerY + radius / 3 + boxHeight / 1.8); // Perfectly centered in the box
+    // Draw the ngValue value (centered inside the box)
+    ctx.fillText(ngValue.toFixed(1), centerX, centerY + radius / 3 + boxHeight / 1.8); // Always show one decimal place
 };
 
 const getN1Angle = (ngValue) => {

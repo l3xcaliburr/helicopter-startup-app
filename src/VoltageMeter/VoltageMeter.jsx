@@ -48,5 +48,4 @@ const VoltageMeter = (ctx, voltage) => {
   ctx.fillText(`${voltage.toFixed(1)} V`, gaugeX + gaugeWidth / 2, gaugeY + gaugeHeight / 2);
 }
 
-
 export default VoltageMeter;
