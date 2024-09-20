@@ -4,7 +4,7 @@ import TotGauge from './TOTGauge';
 import N1Gauge from './N1Gauge';
 import VoltageMeter from './VoltageMeter';
 import BatterySwitch from "./BatterySwitch";
-import StarterButton from "./StartButton";
+import StarterButton from "./StarterButton";
 
 const baseTemperature = 600; // Base temperature (e.g., ambient)
 const maxTemperature = 1000; // Max temperature during light-off
@@ -248,21 +248,41 @@ const StartPanel = () => {
     };
   }, []); // No dependencies - active at any point
 
+  const FuelControlSidebar = ({ fuelFlow, setFuelFlow }) => {
+    return (
+      <div className="fuel-sidebar">
+        <div className="slider-container">
+          <input
+            type="range"
+            min="0"
+            max="1"
+            step="0.01"
+            value={fuelFlow}
+            onChange={(e) => setFuelFlow(parseFloat(e.target.value))}
+            className="vertical-slider"
+          />
+          <label>Fuel Flow: {(fuelFlow * 100).toFixed(0)}%</label>
+        </div>
+      </div>
+    );
+  };
+
   return (
-    <div className="gauge-container">
-      <div className="gauges">
-        <div className="gauge-item">
-          <canvas ref={tempCanvasRef} width={300} height={300}></canvas>
+    <div> {/* Added this div to wrap everything into a single parent */}
+      <div className="header-container">
+        <div className="blank-item">
         </div>
-
-        <div className="gauge-item">
-          <canvas ref={batteryCanvasRef} width={300} height={150}></canvas>
+        <div className="blank-item">
         </div>
-
+        <div className="gauge-item">
+            <canvas ref={batteryCanvasRef} width={300} height={150}></canvas>
+        </div>
+        <div className="blank-item">
+        </div>
         <div className="battery-switch-container">
           <BatterySwitch
             onToggle={(isOn) => {
-              setIsBatteryOn(isOn); 
+              setIsBatteryOn(isOn);
               if (isOn) {
                 setVoltage(24); // Turn on the battery
               } else {
@@ -276,34 +296,48 @@ const StartPanel = () => {
             }}
           />
         </div>
-
-        <div className="starter-button-container">
-          <StarterButton
-            onMouseDown={handleStarterPress}
-            onMouseUp={handleStarterRelease}
-          >
-            Starter
-          </StarterButton>
+      </div>
+      
+      <div className="gauge-container">
+        <div className="gauge-item">
+          <canvas ref={tempCanvasRef} width={300} height={300}></canvas>
         </div>
-
         <div className="gauge-item">
           <canvas ref={ngCanvasRef} width={300} height={300}></canvas>
         </div>
+      </div>
 
-        <div className="fuel-control">
-          <input
-            type="range"
-            min="0"
-            max="1"
-            step=".01"
-            value={fuelFlow}
-            onChange={(e) => setFuelFlow(parseFloat(e.target.value))} // Manually controlled fuel flow
-          />
-          <label>Fuel Flow: {(fuelFlow * 100).toFixed(0)}%</label> {/* Show percentage */}
-        </div>
+      <div className="gauge-container2">
+          <div className="fuel-control">
+            <input
+              type="range"
+              min="0"
+              max="1"
+              step=".01"
+              value={fuelFlow}
+              onChange={(e) => setFuelFlow(parseFloat(e.target.value))} // Manually controlled fuel flow
+            />
+            <label>Fuel Flow: {(fuelFlow * 100).toFixed(0)}%</label> {/* Show percentage */}
+          </div>  
+      </div>
+
+      <div className="footer-container" >
+          <div className="blank-item">
+          </div>
+          <div className="starter-container">
+                <StarterButton
+                  onMouseDown={handleStarterPress}
+                  onMouseUp={handleStarterRelease}
+                >
+                  Starter
+                </StarterButton>
+              </div>
+          <div className="blank-item">
+          </div>
       </div>
     </div>
   );
+
 };
 
 export default StartPanel;

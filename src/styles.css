@@ -3,7 +3,53 @@
   box-sizing: border-box;
 }
 
+.blank-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  max-width: 300px;
+}
+
+.start-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  max-width: 300px;
+}
+
 .gauge-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 20px;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+.header-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 20px;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+.gauge-container2 {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 20px;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+.footer-container {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -17,7 +63,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 20px;
+  gap: 0px;
   width: 100%;
   flex-wrap: wrap;
 }
@@ -35,7 +81,7 @@
   justify-content: column;
   align-items: center;
   flex: 1;
-  max-width: 300px;
+  max-width: 100%;
 }
 
 canvas {
@@ -46,4 +92,57 @@ canvas {
 input[type="range"] {
   margin-top: 10px;
   width: 100%;
+}
+
+
+.starter-button {
+  width: 100px;
+  height: 100px;
+  background: radial-gradient(circle, rgba(255, 0, 0, 1) 0%, rgba(128, 0, 0, 1) 100%);
+  border: none;
+  border-radius: 50%;
+  color: white;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.3);
+  transition: transform 0.1s ease-in-out, box-shadow 0.1s ease-in-out;
+}
+
+.starter-button:active {
+  transform: scale(0.95);
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+/* Sidebar styles */
+.sidebar {
+  position: fixed;
+  right: 0;
+  top: 0;
+  width: 100px; /* Adjust as needed */
+  height: 100%;
+  background-color: #f0f0f0; /* Optional: background color */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  box-shadow: -2px 0 5px rgba(0,0,0,0.1);
+}
+
+/* Responsive adjustments for mobile */
+@media (max-width: 768px) {
+  .sidebar {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    width: 100%;
+    height: auto;
+    flex-direction: row;
+    padding: 5px;
+  }
+
+  .main-content {
+    margin-right: 0;
+    margin-bottom: 70px; /* Adjust for mobile sidebar height */
+  }
 }
