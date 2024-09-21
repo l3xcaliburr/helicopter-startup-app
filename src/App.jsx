@@ -6,17 +6,13 @@ import VoltageMeter from './VoltageMeter';
 import BatterySwitch from "./BatterySwitch";
 import StarterButton from "./StarterButton";
 
-const baseTemperature = 600; // Base temperature (e.g., ambient)
+const baseTemperature = 0; // Base temperature (e.g., ambient)
 const maxTemperature = 1000; // Max temperature during light-off
-const normalOperatingTemp = 710; // Normal operating temperature after self-sustaining
-const k = 12.5; // Constant for exponential function
-const fuelSensitivity = 20; // Set fuel sensitivity to 20
+const normalOperatingTemp = 483; // Normal operating temperature after self-sustaining
+const k = 8.5; // Constant for exponential function
+const fuelSensitivity = 10; // Set fuel sensitivity to 10
 
 const StartPanel = () => {
-  const tempCanvasRef = useRef(null);
-  const ngCanvasRef = useRef(null);
-  const batteryCanvasRef = useRef(null);
-  
   const [temperature, setTemperature] = useState(0);
   const [ngValue, setNgValue] = useState(0); 
   const [voltage, setVoltage] = useState(24); 
@@ -24,6 +20,39 @@ const StartPanel = () => {
   const [isStarting, setIsStarting] = useState(false);
   const [fuelFlow, setFuelFlow] = useState(0); // Fuel flow percentage
   const [isSelfSustaining, setIsSelfSustaining] = useState(false); // Moved inside the component
+  const [isIdleLockReleased, setIsIdleLockReleased] = useState(false);
+  
+  const tempCanvasRef = useRef(null);
+  const ngCanvasRef = useRef(null);
+  const batteryCanvasRef = useRef(null);
+  const fuelFlowRef = useRef(fuelFlow);
+  const isIdleLockReleasedRef = useRef(isIdleLockReleased);
+
+  useEffect(() => {
+    isIdleLockReleasedRef.current = isIdleLockReleased;
+  }, [isIdleLockReleased]);
+
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (event.key === 'Control' || event.key === 'Meta') {
+        setIsIdleLockReleased(true);
+      }
+    };
+  
+    const handleKeyUp = (event) => {
+      if (event.key === 'Control' || event.key === 'Meta') {
+        setIsIdleLockReleased(false);
+      }
+    };
+  
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keyup', handleKeyUp);
+  
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keyup', handleKeyUp);
+    };
+  }, []);
 
   useEffect(() => {
     const tempCanvas = tempCanvasRef.current;
@@ -70,7 +99,8 @@ const StartPanel = () => {
   const [isLightOff, setIsLightOff] = useState(false);
 
   useEffect(() => {
-    if (isBatteryOn && isStarting && fuelFlow > 0 && !isLightOff) {
+     // Start light-off process if starting or self-sustaining with fuel flow
+    if ((isBatteryOn && isStarting && fuelFlow > 0 && !isLightOff) || (isSelfSustaining && fuelFlow > 0 && !isLightOff)) {
       // Clear any existing cooldown interval
       if (coolDownIntervalRef.current) {
         clearInterval(coolDownIntervalRef.current);
@@ -79,7 +109,7 @@ const StartPanel = () => {
 
       // Start light-off delay if not already started
       if (!lightOffTimeoutRef.current) {
-        const lightOffDelay = 2000; // milliseconds
+        const lightOffDelay = 1500; // milliseconds
 
         lightOffTimeoutRef.current = setTimeout(() => {
           setIsLightOff(true);
@@ -94,8 +124,8 @@ const StartPanel = () => {
       lightOffTimeoutRef.current = null;
     }
 
-    // Begin temperature increase only after light-off occurs
-    if (isLightOff) {
+    // Begin temperature increase when light-off has occurred or engine is self-sustaining
+    if (isLightOff || (isSelfSustaining && fuelFlow > 0)) {
       let targetTemperature;
 
       if (ngValue < 15) {
@@ -103,9 +133,9 @@ const StartPanel = () => {
         targetTemperature =
           baseTemperature +
           (maxTemperature - baseTemperature) * (1 - Math.exp(-k * fuelFlow));
-      } else if (ngValue >= 15 && ngValue < 66) {
+      } else if (ngValue >= 15 && ngValue < 63) {
         // Acceleration phase
-        const ngFactor = (66 - ngValue) / 51;
+        const ngFactor = (63 - ngValue) / 30;
         targetTemperature =
           baseTemperature +
           ((maxTemperature - baseTemperature) * (1 - Math.exp(-k * fuelFlow))) * ngFactor;
@@ -117,7 +147,7 @@ const StartPanel = () => {
           (normalOperatingTemp - baseTemperature) * (1 - Math.exp(-k_sustain * fuelFlow));
       }
 
-      const responseFactor = fuelSensitivity / 70000;
+      const responseFactor = fuelSensitivity / 200000;
       const temperatureDifference = targetTemperature - temperature;
       const temperatureAdjustment = temperatureDifference * responseFactor;
       const newTemperature = temperature + temperatureAdjustment;
@@ -130,10 +160,26 @@ const StartPanel = () => {
       }
     }
 
-    // Reset isLightOff if starting conditions are not met
-    if (!isStarting || !isBatteryOn || fuelFlow === 0) {
-      setIsLightOff(false);
+    if ((!isStarting && !isSelfSustaining) || fuelFlow === 0) {
+      if (!coolDownIntervalRef.current) {
+        coolDownIntervalRef.current = setInterval(() => {
+          setTemperature((prevTemp) => {
+            const newTemp = prevTemp - 5; // Adjust the cooldown rate as needed
+            if (newTemp <= baseTemperature) {
+              clearInterval(coolDownIntervalRef.current);
+              coolDownIntervalRef.current = null;
+              return baseTemperature;
+            }
+            return newTemp;
+          });
+        }, 100);
+      }
+    }
 
+    // Reset isLightOff if starting conditions are not met
+    if ((!isStarting && !isSelfSustaining) || !isBatteryOn || fuelFlow === 0) {
+      setIsLightOff(false);
+  
       // Clear light-off timeout if still pending
       if (lightOffTimeoutRef.current) {
         clearTimeout(lightOffTimeoutRef.current);
@@ -149,7 +195,11 @@ const StartPanel = () => {
     isLightOff,
   ]);
 
-  // N1 increase/decrease logic
+  // Update the ref whenever fuelFlow changes
+  useEffect(() => {
+    fuelFlowRef.current = fuelFlow;
+  }, [fuelFlow]);
+
   useEffect(() => {
     let n1Interval;
 
@@ -157,8 +207,8 @@ const StartPanel = () => {
       // Starter is engaged and battery is on
       n1Interval = setInterval(() => {
         setNgValue((prevNg) => {
-          const newNg = prevNg + 0.5; // Increased rate for faster N1 rise
-          if (newNg >= 55) {
+          const newNg = prevNg + 0.3; // Increased rate for faster N1 rise
+          if (newNg >= 42) {
             setIsSelfSustaining(true); // Engine becomes self-sustaining
           }
           return newNg;
@@ -169,23 +219,31 @@ const StartPanel = () => {
       n1Interval = setInterval(() => {
         setNgValue((prevNg) => {
           const idleFuelFlow = 0.4; // 40% fuel flow corresponds to idle
-          const idleNg = 67;
-          const maxNg = 96;
+          const idleNg = 63;
+          const maxNg = 83.7;
 
           let targetNg;
-          if (fuelFlow <= idleFuelFlow) {
-            targetNg = idleNg;
+          const currentFuelFlow = fuelFlowRef.current; // Access the latest fuel flow
+
+          if (currentFuelFlow === 0) {
+            // Fuel flow is zero, Ng should decrease
+            targetNg = 0;
+          } else if (currentFuelFlow <= idleFuelFlow) {
+            // Fuel flow between 0 and idleFuelFlow
+            // Set targetNg proportionally between 0 and idleNg
+            targetNg = (currentFuelFlow / idleFuelFlow) * idleNg;
           } else {
+            // Fuel flow above idleFuelFlow
             const fuelFlowRange = 1 - idleFuelFlow;
             const ngRange = maxNg - idleNg;
-            const fuelFlowAboveIdle = fuelFlow - idleFuelFlow;
+            const fuelFlowAboveIdle = currentFuelFlow - idleFuelFlow;
             const ngIncrement = (fuelFlowAboveIdle / fuelFlowRange) * ngRange;
             targetNg = idleNg + ngIncrement;
           }
 
           // Smooth N1 adjustment towards targetNg
           const ngDifference = targetNg - prevNg;
-          const ngAdjustment = ngDifference * 0.08; // Adjust response rate as needed
+          const ngAdjustment = ngDifference * 0.1; // Adjust response rate as needed
 
           return prevNg + ngAdjustment;
         });
@@ -199,7 +257,7 @@ const StartPanel = () => {
             setIsSelfSustaining(false); // Reset self-sustaining state
             return 0;
           }
-          return prevNg - 0.5; // Adjust rate as needed
+          return prevNg - 0.2; // Adjust rate as needed
         });
       }, 100);
     }
@@ -207,13 +265,13 @@ const StartPanel = () => {
     return () => {
       clearInterval(n1Interval);
     };
-  }, [isStarting, isBatteryOn, fuelFlow, isSelfSustaining]);
+  }, [isStarting, isBatteryOn, isSelfSustaining]);
 
   // Handle starter button press
   const handleStarterPress = () => {
     if (isBatteryOn) {
       setIsStarting(true);
-      setVoltage(22); 
+      setVoltage(18.5); 
     }
   };
 
@@ -223,49 +281,36 @@ const StartPanel = () => {
     // N1 behavior after release is handled in the N1 useEffect
   };
 
-  // Handle fuel control scrolling (smooth and bidirectional, usable at any point)
   useEffect(() => {
     const handleScroll = (event) => {
       setFuelFlow(prevFuelFlow => {
         let newFuelFlow = prevFuelFlow;
-
+  
         if (event.deltaY < 0) {
           // Scrolling up - decrease fuel flow
-          newFuelFlow = Math.max(prevFuelFlow - 0.003, 0); // Decrease by 0.003, floor at 0%
+          newFuelFlow = prevFuelFlow - 0.003;
+  
+          if (prevFuelFlow >= 0.4 && newFuelFlow < 0.4 && !isIdleLockReleasedRef.current) {
+            // Idle lock engaged, prevent reducing below 60%
+            newFuelFlow = 0.4;
+          } else {
+            newFuelFlow = Math.max(newFuelFlow, 0);
+          }
         } else if (event.deltaY > 0) {
           // Scrolling down - increase fuel flow
-          newFuelFlow = Math.min(prevFuelFlow + 0.003, 1); // Increase by 0.003, cap at 100%
+          newFuelFlow = Math.min(prevFuelFlow + 0.003, 1);
         }
-
+  
         return newFuelFlow;
       });
     };
-
-    window.addEventListener('wheel', handleScroll); // Attach the wheel event listener
-
+  
+    window.addEventListener('wheel', handleScroll);
+  
     return () => {
-      window.removeEventListener('wheel', handleScroll); // Clean up the listener on component unmount
+      window.removeEventListener('wheel', handleScroll);
     };
-  }, []); // No dependencies - active at any point
-
-  const FuelControlSidebar = ({ fuelFlow, setFuelFlow }) => {
-    return (
-      <div className="fuel-sidebar">
-        <div className="slider-container">
-          <input
-            type="range"
-            min="0"
-            max="1"
-            step="0.01"
-            value={fuelFlow}
-            onChange={(e) => setFuelFlow(parseFloat(e.target.value))}
-            className="vertical-slider"
-          />
-          <label>Fuel Flow: {(fuelFlow * 100).toFixed(0)}%</label>
-        </div>
-      </div>
-    );
-  };
+  }, []);
 
   return (
     <div> {/* Added this div to wrap everything into a single parent */}
@@ -309,13 +354,22 @@ const StartPanel = () => {
 
       <div className="gauge-container2">
           <div className="fuel-control">
-            <input
+          <input
               type="range"
               min="0"
               max="1"
               step=".01"
               value={fuelFlow}
-              onChange={(e) => setFuelFlow(parseFloat(e.target.value))} // Manually controlled fuel flow
+              onChange={(e) => {
+                let newFuelFlow = parseFloat(e.target.value);
+
+                if (newFuelFlow < 0.6 && fuelFlow >= 0.6 && !isIdleLockReleased) {
+                  // Idle lock engaged, prevent reducing below 20%
+                  newFuelFlow = 0.6;
+                }
+
+                setFuelFlow(newFuelFlow);
+              }}
             />
             <label>Fuel Flow: {(fuelFlow * 100).toFixed(0)}%</label> {/* Show percentage */}
           </div>  

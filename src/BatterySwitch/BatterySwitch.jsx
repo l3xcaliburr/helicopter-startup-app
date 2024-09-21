@@ -10,7 +10,7 @@ const SwitchContainer = styled.div`
   width: 15%;
   height: 15%;
   background-color: black;
-  border-radius: 2px;
+  border-radius: 3px;
   position: relative;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
   max-width: 100%; /* Ensure responsiveness */
