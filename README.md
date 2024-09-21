@@ -1,70 +1,63 @@
-# Getting Started with Create React App
+Helicopter Turbine Engine Start Simulation
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+ROTORDEV, LLC
+Author - Alex Brooks
+rotordev.com
+alex@rotordev.com
 
-## Available Scripts
+This React application simulates the start-up sequence of a helicopter turbine engine. It features interactive controls for engaging the starter, managing fuel flow, and monitoring engine parameters like temperature (TOT) and engine speed (N1, Ng). The project aims to provide a realistic experience of manually starting a helicopter turbine engine, such as those found in Bell 206 and similar aircraft without Full Authority Digital Engine Control (FADEC).
 
-In the project directory, you can run:
+Features:
+- Interactive gauge displays for N1, TOT, and voltage.
+- Controls for the battery switch, starter button, and fuel flow.
+- Realistic simulation of engine start-up physics including temperature effects and engine speed dynamics.
+- Visual and audio feedback on engine status and warnings.
 
-### `npm start`
+Getting Started:
+To run this project on your local machine, follow these steps:
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+1. Prerequisites:
+   - Ensure you have Node.js installed on your system.
+   - Clone the repository to your local machine.
+   - Navigate to the project directory and install dependencies using npm or yarn:
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+   ```
+   npm install
+   ```
+   or
+   ```
+   yarn install
+   ```
 
-### `npm test`
+2. Running the Application:
+   - Start the application by running:
+   
+   ```
+   npm start
+   ```
+   or
+   ```
+   yarn start
+   ```
+   - Open your web browser and access http://localhost:3000 to view the application.
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+3. Building for Production:
+   - To build the application for production, run:
+   
+   ```
+   npm run build
+   ```
+   or
+   ```
+   yarn build
+   ```
+   - This will generate a 'build' folder with optimized files for deployment.
 
-### `npm run build`
+Using the Simulation:
+- Power the System: Toggle the battery switch to "On" to power up the helicopter's electrical systems.
+- Engage the Starter: Press and hold the starter button (SPACEBAR) until the N1 gauge shows the engine reaching about 42% (or the specified self-sustaining speed). Release the starter once this threshold is met.
+- Manage Fuel Flow: Gradually increase the fuel flow using the slider (SCROLL) to raise the engine's temperature and speed without exceeding safe limits. Monitor the TOT and N1 gauges to ensure the engine does not overheat or stall.
+- Monitor and Adjust: Continue to adjust the fuel flow as needed to bring the engine to a stable operating condition. Watch for visual and audio feedback to guide your adjustments.
+- Shutting Down: Reduce the fuel flow to zero using the slider to shut down the engine safely. Turn off the battery switch to power down the system.
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
-
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+Please note: This simulation is for educational and demonstration purposes and may not accurately reflect all dynamics of an actual turbine engine start-up.
