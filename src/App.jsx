@@ -34,6 +34,9 @@ const StartPanel = () => {
   const lightOffTimeoutRef = useRef(null);
   const coolDownIntervalRef = useRef(null);
   const terminalRef = useRef(null);
+  const prevIsStartingRef = useRef(isStarting);
+  const prevIsSelfSustainingRef = useRef(isSelfSustaining);
+  const prevFuelFlowRef = useRef(fuelFlow);
   const addLog = (message) => {
     setLogs((prevLogs) => [...prevLogs, message]);
   };
@@ -254,6 +257,21 @@ const StartPanel = () => {
   useEffect(() => {
     let n1Interval;
 
+    if (isStarting && isBatteryOn && prevIsStartingRef.current !== isStarting) {
+      addLog("Engine is starting");
+    }
+    prevIsStartingRef.current = isStarting; // Update the previous state
+
+    if (isSelfSustaining && prevIsSelfSustainingRef.current !== isSelfSustaining) {
+      addLog("Engine is self-sustaining");
+    }
+    prevIsSelfSustainingRef.current = isSelfSustaining;
+
+    if (fuelFlow === 0 && prevFuelFlowRef.current !== fuelFlow) {
+      addLog("Fuel flow cut to zero during self-sustaining");
+    }
+    prevFuelFlowRef.current = fuelFlow; // Update the previous fuel flow
+
     if (isStarting && isBatteryOn) {
       // Starter is engaged and battery is on
       n1Interval = setInterval(() => {
@@ -340,7 +358,7 @@ const StartPanel = () => {
     return () => {
       clearInterval(n1Interval);
     };
-  }, [isStarting, isBatteryOn, isSelfSustaining]);
+  }, [isStarting, isBatteryOn, isSelfSustaining, fuelFlow]);
 
   //Display application using HTML
   return (
