@@ -48,7 +48,6 @@ canvas {
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-bottom: 75px;
   width: 100%;
   box-sizing: border-box;
 }
@@ -57,7 +56,7 @@ canvas {
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-bottom: 200px;
+
   width: 100%;
   box-sizing: border-box;
 }
