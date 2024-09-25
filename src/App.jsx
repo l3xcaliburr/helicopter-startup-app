@@ -362,7 +362,8 @@ const StartPanel = () => {
 
   //Display application using HTML
   return (
-    <div> {/* Added this div to wrap everything into a single parent */}
+    <div className="app-wrapper">
+      <div className="main-content">
       <div className="header-container">
 
       <div className="gauge-item">
@@ -440,6 +441,8 @@ const StartPanel = () => {
         <div className="blank-item"></div>
       </div>
     </div>
+    </div>
+  
   );
 
 };
