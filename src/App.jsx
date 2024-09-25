@@ -439,14 +439,6 @@ const StartPanel = () => {
         </div>
         <div className="blank-item"></div>
       </div>
-
-      <div className="footer-container" >
-          <div className="blank-item">
-            </div>
-          
-          <div className="blank-item">
-        </div>
-      </div>
     </div>
   );
 
